@@ -23,4 +23,4 @@ pipeline {
             }
         }
     }
-} //merhaba selamnamber
+} //merhaba selamnamber aynen knkaaaa tamamdır ya 
