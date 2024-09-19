@@ -4,8 +4,13 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                echo 'Building...'
-               
+                docker {
+                    image 'emreyesilkaya/jenkins'
+                }
+            
+            }
+            steps{
+                sh 'docker run -it emreyesilkaya/jenkins .'
             }
         }
 
