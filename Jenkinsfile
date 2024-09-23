@@ -4,7 +4,7 @@ pipeline {
         stage('Build') {
             steps {
                 script
-                    sh 'docker build -t Saat:latest .'
+                    sh 'docker build -t jenkins:latest .'
                 }
             }
         }
