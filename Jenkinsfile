@@ -1,26 +1,22 @@
 pipeline {
     agent any
-
     stages {
         stage('Build') {
             steps {
-                docker {
-                    image 'emreyesilkaya/jenkins'
+                script
+                    sh 'docker build -t Saat:latest .'
                 }
-            
-            }
-            steps{
-                sh 'docker run -it emreyesilkaya/jenkins .'
             }
         }
-
-     
-
-        stage('Deploy') {
+        stage('dockerhuba push') {
             steps {
-                echo 'Deploying...'
-                
+                script {
+                    //imagea çeken bölüm burası olcak
+                    sh 'docker tag jenkins:latest emreyesilkaya/jenkins:latest'
+                    sh 'docker push yemreyesilkaya/jenkins:latest'
+                }
             }
         }
+    
     }
-} 
+
