@@ -1,11 +1,5 @@
 pipeline {
-    agent {
-        docker {
-            image 'docker:19.03' 
-            args '-v /var/run/docker.sock:/var/run/docker.sock'
-        }
-    }
-
+    agent any
     stages {
         stage('Build') {
             steps {
@@ -13,7 +7,7 @@ pipeline {
                 sh 'echo "Build başarılı"'
             }
         }
-
+        
         stage('Run') {
             steps {
                 sh 'docker run --rm my-python-app:latest'
