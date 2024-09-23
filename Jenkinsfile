@@ -13,7 +13,7 @@ pipeline {
                 script {
                     //imagea çeken bölüm burası olcak
                     sh 'docker tag jenkins:latest emreyesilkaya/jenkins:latest'
-                    sh 'docker push yemreyesilkaya/jenkins:latest'
+                    sh 'docker push emreyesilkaya/jenkins:latest'
                 }
             }
         }
