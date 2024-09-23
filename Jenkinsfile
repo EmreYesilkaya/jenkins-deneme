@@ -3,20 +3,21 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                script{ 
-                    sh 'docker build -t jenkins:latest .'
-                } 
+                script {
+                    docker.build('jenkins:latest').inside {
+                        sh 'başardın"'
+                    }
+                }
             }
         }
         stage('dockerhuba push') {
             steps {
                 script {
-                    //imagea çeken bölüm burası olcak
                     sh 'docker tag jenkins:latest emreyesilkaya/jenkins:latest'
                     sh 'docker push emreyesilkaya/jenkins:latest'
+                    }
                 }
             }
         }
-    
     }
 }
