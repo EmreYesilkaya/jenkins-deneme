@@ -3,10 +3,11 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                script
+                script{ 
                     sh 'docker build -t jenkins:latest .'
-                }
+                } 
             }
+        }
         stage('dockerhuba push') {
             steps {
                 script {
