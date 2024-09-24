@@ -2,7 +2,7 @@ pipeline {
     agent any
     environment {
         DOCKER_IMAGE = "emreyesilkaya/jenkins"
-        DOCKER_TAG = "3"
+        DOCKER_TAG = "${BUILD_NUMBER}"
         KUBERNETES_MASTER = "138.201.189.196"  // Master node IP'si
     }
     stages {
@@ -25,12 +25,25 @@ pipeline {
         }
         stage('Kubernetes Deploy') {
             steps {
-                sh """
-                sshpass -p 'Sgnm238..' ssh -o StrictHostKeyChecking=no master@${KUBERNETES_MASTER} '
-                kubectl set image deployment/your-deployment-name your-container-name=${DOCKER_IMAGE}:${DOCKER_TAG}
-                '
-                """
+                script {
+                    def deployCmd = "kubectl set image deployment/your-deployment-name your-container-name=${DOCKER_IMAGE}:${DOCKER_TAG}"
+                    
+                    // Jenkins'in Kubernetes cluster'ında çalıştığını varsayarak:
+                    sh """
+                    ${deployCmd}
+                    """
+                    
+                    // Eğer Jenkins Kubernetes dışında çalışıyorsa ve SSH kullanmanız gerekiyorsa:
+                    // sh """
+                    // sshpass -p 'Sgnm238..' ssh -o StrictHostKeyChecking=no master@${KUBERNETES_MASTER} '${deployCmd}'
+                    // """
+                }
             }
+        }
+    }
+    post {
+        always {
+            sh 'docker logout'
         }
     }
 }
