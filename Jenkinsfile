@@ -1,34 +1,9 @@
 pipeline {
-    agent {
-        kubernetes {
-            yaml '''
-                apiVersion: v1
-                kind: Pod
-                spec:
-                  containers:
-                  - name: docker
-                    image: docker:dind
-                    command:
-                    - cat
-                    tty: true
-                    privileged: true
-                    volumeMounts:
-                    - name: dind-storage
-                      mountPath: /var/lib/docker
-                  - name: kubectl
-                    image: bitnami/kubectl:latest
-                    command:
-                    - cat
-                    tty: true
-                  volumes:
-                  - name: dind-storage
-                    emptyDir: {}
-            '''
-        }
-    }
+    agent any
     environment {
         DOCKER_IMAGE = "emreyesilkaya/jenkins"
         DOCKER_TAG = "3"
+        KUBERNETES_MASTER = "138.201.189.196"  // Master node IP'si
     }
     stages {
         stage('Docker build') {
@@ -54,47 +29,14 @@ pipeline {
                 }
             }
         }
-        stage('Deploy to Kubernetes') {
+        stage('Kubernetes Deploy') {
             steps {
-                container('kubectl') {
-                    withKubeConfig([credentialsId: 'kubernetes-config']) {
-                        sh '''
-                        cat <<EOF | kubectl apply -f -
-                        apiVersion: apps/v1
-                        kind: Deployment
-                        metadata:
-                          name: jenkins-test-deployment
-                        spec:
-                          replicas: 1
-                          selector:
-                            matchLabels:
-                              app: jenkins-test
-                          template:
-                            metadata:
-                              labels:
-                                app: jenkins-test
-                            spec:
-                              containers:
-                              - name: jenkins-test
-                                image: ${DOCKER_IMAGE}:${DOCKER_TAG}
-                                ports:
-                                - containerPort: 8080
-                        ---
-                        apiVersion: v1
-                        kind: Service
-                        metadata:
-                          name: jenkins-test-service
-                        spec:
-                          selector:
-                            app: jenkins-test
-                          ports:
-                            - protocol: TCP
-                              port: 80
-                              targetPort: 8080
-                          type: LoadBalancer
-                        EOF
-                        '''
-                    }
+                sshagent(['master-node-ssh']) {
+                    sh """
+                    ssh -o StrictHostKeyChecking=no master@${KUBERNETES_MASTER} '
+                    kubectl set image deployment/your-deployment-name your-container-name=${DOCKER_IMAGE}:${DOCKER_TAG}
+                    '
+                    """
                 }
             }
         }
