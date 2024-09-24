@@ -2,7 +2,7 @@ pipeline {
     agent any
     environment {
         DOCKER_IMAGE = "emreyesilkaya/jenkins"
-        DOCKER_TAG = "2"
+        DOCKER_TAG = "3"
     }
     stages {
         stage('Docker build') {
@@ -42,7 +42,7 @@ pipeline {
         stage('Kubernetes Deploy') {
             steps {
                 script {
-                    // Kubernetes ile yeni br pod deploy ediyoruz
+                    // Kubernetes ile yeni br pd deploy ediyoruzs
                     withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
                         sh '''
                             export KUBECONFIG=${KUBECONFIG}
