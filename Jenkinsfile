@@ -1,8 +1,5 @@
 pipeline {
-    agent {
-        // Jenkins master node üzerinde çalıştırıyoruz
-        label 'master'
-    }
+    agent any
     environment {
         DOCKER_IMAGE = "emreyesilkaya/jenkins"
         DOCKER_TAG = "2"
@@ -16,7 +13,7 @@ pipeline {
                 }
             }
         }
-        stage('Docker run') {
+        stage ('Docker run') {
             steps {
                 script {
                     // Docker imajını çalıştırıyoruz
@@ -27,7 +24,7 @@ pipeline {
         stage('Docker Hub Login') {
             steps {
                 script {
-                    // Docker Hub'da login oluyoruz
+                    // Docker Hub login
                     withCredentials([usernamePassword(credentialsId: 'df4ec335-a92d-46a8-ae3a-5c7b852481bc', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASS')]) {
                         sh 'echo ${DOCKERHUB_PASS} | docker login -u ${DOCKERHUB_USER} --password-stdin'
                     }
@@ -45,10 +42,11 @@ pipeline {
         stage('Kubernetes Deploy') {
             steps {
                 script {
-                    // Kubernetes podunu deploy etmek için kubectl komutlarını çalıştırıyoruz
+                    // Kubernetes ile yeni br pod deploy ediyoruz edilen poda dockerhudabn kendi imageımızı çekeceğiz
                     withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
                         sh '''
                             export KUBECONFIG=${KUBECONFIG}
+                            # Kubernetes'te yeni bir deployment veya pod oluşturmak
                             kubectl apply -f - <<EOF
                             apiVersion: apps/v1
                             kind: Deployment
