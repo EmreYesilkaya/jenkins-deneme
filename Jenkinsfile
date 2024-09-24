@@ -1,13 +1,21 @@
 pipeline {
     agent any
     stages {
-        stage('run docker') {
+        stage('Docker build') {
             steps {
                 script {
-                    def img = 'httpd:2.4-alpine'
-                    docker.image(img).run('-d -p 8080:80')
+                    sh 'docker build -t time-python . '
+                    
                 }
             }
+        }
+        stage ('docker run'){
+           steps{
+              script{
+                sh'docker run -d time-python'
+              }
+         }
+
         }
     }
 }
