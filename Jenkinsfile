@@ -25,13 +25,11 @@ pipeline {
         }
         stage('Kubernetes Deploy') {
             steps {
-                sshagent(['master-node-ssh']) {
-                    sh """
-                    ssh -o StrictHostKeyChecking=no master@${KUBERNETES_MASTER} '
-                    kubectl set image deployment/your-deployment-name your-container-name=${DOCKER_IMAGE}:${DOCKER_TAG}
-                    '
-                    """
-                }
+                sh """
+                sshpass -p 'Sgnm238..' ssh -o StrictHostKeyChecking=no master@${KUBERNETES_MASTER} '
+                kubectl set image deployment/your-deployment-name your-container-name=${DOCKER_IMAGE}:${DOCKER_TAG}
+                '
+                """
             }
         }
     }
