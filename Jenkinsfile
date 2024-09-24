@@ -52,8 +52,6 @@ pipeline {
                 script {
                     // Kubernetes ile yeni bir deployment oluşturuyoruz
                         sh '''
-                            export KUBECONFIG=${KUBECONFIG}
-                            # Kubernetes'te yeni bir deployment veya pod oluşturmak
                             kubectl apply -f - <<EOF
                             apiVersion: apps/v1
                             kind: Deployment
@@ -79,6 +77,6 @@ pipeline {
                     }
                 }
             }
-        
+    
     }
 }
