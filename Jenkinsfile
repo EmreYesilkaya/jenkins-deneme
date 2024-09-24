@@ -42,7 +42,7 @@ pipeline {
         stage('Kubernetes Deploy') {
             steps {
                 script {
-                    // Kubernetes ile yeni br pod deploy ediyoruz edilen poda dockerhudabn kendi imageımızı çekeceğiz
+                    // Kubernetes ile yeni br pod deploy ediyoruz
                     withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
                         sh '''
                             export KUBECONFIG=${KUBECONFIG}
