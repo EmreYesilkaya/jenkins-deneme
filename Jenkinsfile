@@ -12,7 +12,7 @@ pipeline {
         stage ('docker run'){
            steps{
               script{
-                sh'docker run -d -t time-python'
+                sh'docker run -t time-python'
               }
          }
 
