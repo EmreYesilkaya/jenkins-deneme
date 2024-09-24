@@ -1,7 +1,7 @@
 pipeline {
     agent any
     environment {
-        DOCKER_IMAGE = "emreyesilkaya/jenkins"  
+        DOCKER_IMAGE = "emreyesilkaya/jenkins"
         DOCKER_TAG = "2"  // tagı daha kolay koyabilmek için
     }
     stages {
@@ -12,7 +12,7 @@ pipeline {
                 }
             }
         }
-        stage ('Docker run'){
+        stage ('Docker run') {
             steps {
                 script {
                     sh 'docker run -t ${DOCKER_IMAGE}:${DOCKER_TAG}'
@@ -22,7 +22,6 @@ pipeline {
         stage('Docker Hub Login') {
             steps {
                 script {
-                    // Docker Hub'da oturum açma
                     withCredentials([usernamePassword(credentialsId: 'df4ec335-a92d-46a8-ae3a-5c7b852481bc', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASS')]) {
                         sh 'echo ${DOCKERHUB_PASS} | docker login -u ${DOCKERHUB_USER} --password-stdin'
                     }
@@ -33,6 +32,18 @@ pipeline {
             steps {
                 script {
                     sh 'docker push ${DOCKER_IMAGE}:${DOCKER_TAG}'
+                }
+            }
+        }
+        stage('Kubernetes Deploy') {
+            steps {
+                script {
+                    // Kubectl komutunu kullanarak deployment işlemi
+                    withCredentials([string(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
+                        sh '''
+                            kubectl set image deployment/jenkins-deployment jenkins-container=${DOCKER_IMAGE}:${DOCKER_TAG} --record
+                        '''
+                    }
                 }
             }
         }
