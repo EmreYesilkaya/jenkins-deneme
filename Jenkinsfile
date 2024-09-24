@@ -27,16 +27,12 @@ pipeline {
             steps {
                 script {
                     def deployCmd = "kubectl set image deployment/your-deployment-name your-container-name=${DOCKER_IMAGE}:${DOCKER_TAG}"
-                    
-                    // Jenkins'in Kubernetes cluster'ında çalıştığını varsayarak:
-                    sh """
-                    ${deployCmd}
-                    """
+
                     
                     // Eğer Jenkins Kubernetes dışında çalışıyorsa ve SSH kullanmanız gerekiyorsa:
-                    // sh """
-                    // sshpass -p 'Sgnm238..' ssh -o StrictHostKeyChecking=no master@${KUBERNETES_MASTER} '${deployCmd}'
-                    // """
+                     sh """
+                     sshpass -p 'Sgnm238..' ssh -o StrictHostKeyChecking=no master@${KUBERNETES_MASTER} '${deployCmd}'
+                     """
                 }
             }
         }
