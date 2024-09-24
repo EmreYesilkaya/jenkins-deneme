@@ -23,6 +23,9 @@ spec:
       items:
         - key: .dockerconfigjson
           path: config.json
+  - name: jnlp
+    image: jenkins/inbound-agent:4.10-1
+    args: ["${computer.jnlpmac} ${computer.name}"]
 '''
         }
     }
