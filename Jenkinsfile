@@ -51,7 +51,6 @@ pipeline {
             steps {
                 script {
                     // Kubernetes ile yeni bir deployment oluşturuyoruz
-                    withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
                         sh '''
                             export KUBECONFIG=${KUBECONFIG}
                             # Kubernetes'te yeni bir deployment veya pod oluşturmak
@@ -80,6 +79,6 @@ pipeline {
                     }
                 }
             }
-        }
+        
     }
 }
