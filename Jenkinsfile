@@ -1,9 +1,9 @@
 pipeline {
-    agent any // Herhangi bir ajan kullanılabilir.
+    agent any 
 
     environment {
-        DOCKER_IMAGE = "emreyesilkaya/jenkins" // Docker imajının ismi
-        DOCKER_TAG = "${BUILD_NUMBER}" // Her build için otomatik artan versiyon numarası
+        DOCKER_IMAGE = "emreyesilkaya/jenkins" 
+        DOCKER_TAG = "${BUILD_NUMBER}" 
     }
 
     stages {
@@ -22,39 +22,38 @@ pipeline {
             }
         }
 
-        // Kubernetes'e deploy etme aşaması
         stage('Kubernetes Deploy') {
             agent {
                 kubernetes {
                     yaml """
-                        apiVersion: v1
-                        kind: Pod
-                        metadata:
-                          labels:
-                            app: my-app
-                        spec:
-                          containers:
-                          - name: my-app
-                            image: ${DOCKER_IMAGE}:${DOCKER_TAG}
-                            ports:
-                            - containerPort: 80
+                    apiVersion: v1
+                    kind: Pod
+                    metadata:
+                      labels:
+                        app: my-app
+                    spec:
+                      containers:
+                      - name: my-app
+                        image: ${DOCKER_IMAGE}:${DOCKER_TAG}
+                        ports:
+                        - containerPort: 80
+                      - name: jnlp
+                        image: jenkins/inbound-agent:4.10-3
+                        args: ["\${computer.jnlpmac}", "\${computer.name}"]
                     """
                 }
             }
             steps {
-                // Uygulamanın çalıştığını simüle etme ve deploy mesajı yazdırma
                 container('my-app') {
                     sh 'echo "Uygulama başarıyla deploy edildi ve çalışıyor!"'
-                    sh 'sleep 30' // Uygulamanın simülasyonu için
+                    sh 'sleep 30' 
                 }
             }
         }
     }
 
-    // Pipeline her zaman çalıştıktan sonra yapılacak işlemler
     post {
         always {
-            // Docker Hub'dan çıkış yap
             sh "docker logout"
         }
     }
