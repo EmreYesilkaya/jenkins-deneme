@@ -3,11 +3,13 @@ pipeline {
     environment {
         DOCKER_IMAGE = "emreyesilkaya/jenkins"
         DOCKER_TAG = "${BUILD_NUMBER}"
-        KUBECONFIG = credentials('my-kubeconfig') // Kubeconfig credential
-        MASTER_NODE_IP = "138.201.189.196" // Master node IP adresi
+        MASTER_NODE_IP = "138.201.189.196"  // Master node IP adresi
+        SSH_USER = "master@138.201.189.196"      // SSH kullanıcı adı
+        SSH_PASS = "Sgnm238.."      // SSH şifresi
     }
     
     stages {
+        // Ortam değişkenlerini kontrol et
         stage('Environment Check') {
             steps {
                 sh 'printenv'
@@ -41,11 +43,11 @@ pipeline {
         stage('Kubernetes Deploy') {
             steps {
                 script {
-                    def deployCmd = "kubectl --kubeconfig=${KUBECONFIG} set image deployment/your-deployment-name your-container-name=${DOCKER_IMAGE}:${DOCKER_TAG}"
+                    def deployCmd = "kubectl set image deployment/your-deployment-name your-container-name=${DOCKER_IMAGE}:${DOCKER_TAG}"
                     
-                    // SSH ile master node'da kubectl komutunu çalıştır
+                    // SSH ile master node üzerinde kubectl komutunu çalıştır
                     sh """
-                    sshpass -p 'your-master-node-password' ssh -o StrictHostKeyChecking=no user@${MASTER_NODE_IP} '${deployCmd}'
+                    sshpass -p '${SSH_PASS}' ssh -o StrictHostKeyChecking=no ${SSH_USER}@${MASTER_NODE_IP} '${deployCmd}'
                     """
                 }
             }
@@ -54,7 +56,7 @@ pipeline {
 
     post {
         always {
-            // Docker logout
+            // Docker'dan çıkış yap
             sh 'docker logout'
         }
     }
