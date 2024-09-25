@@ -28,25 +28,6 @@ pipeline {
             }
         }
 
-        // Eğer Kubectl Yüklü Değilse Yükle
-        stage('Install Kubectl if Not Installed') {
-            steps {
-                script {
-                    def kubectlCheck = sh(script: 'which kubectl', returnStatus: true)
-                    if (kubectlCheck != 0) {
-                        echo "Installing kubectl..."
-                        sh '''
-                        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-                        chmod +x kubectl
-                        sudo mv kubectl /usr/local/bin/
-                        '''
-                    } else {
-                        echo "kubectl is already installed."
-                    }
-                }
-            }
-        }
-
         // Docker İmajını Build Et
         stage('Docker Build') {
             steps {
@@ -74,10 +55,7 @@ pipeline {
         stage('Kubernetes Deploy') {
             steps {
                 script {
-                    // Kubeconfig dosyasını kullanarak Kubernetes cluster'ına bağlanma
                     def deployCmd = "kubectl --kubeconfig=${KUBECONFIG} set image deployment/your-deployment-name your-container-name=${DOCKER_IMAGE}:${DOCKER_TAG}"
-                    
-                    // Kubectl komutunu çalıştır
                     sh deployCmd
                 }
             }
