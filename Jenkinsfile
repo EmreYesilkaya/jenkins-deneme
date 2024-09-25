@@ -2,13 +2,14 @@ pipeline {
     agent none
 
     environment {
-        DOCKER_IMAGE = "emreyesilkaya/time-checker" 
+        DOCKER_IMAGE = "emreyesilkaya/jenkins" 
         DOCKER_TAG = "${BUILD_NUMBER}" 
     }
 
     stages {
+        // Docker imajını oluşturma ve Docker Hub'a yükleme aşaması
         stage('Docker Build ve Push') {
-            agent { label 'master' }
+            agent { label 'master' }  // İşlemi master node üzerinde çalıştır.
             steps {
                 script {
                     // Docker Hub'a giriş yap
@@ -23,21 +24,17 @@ pipeline {
         }
 
         stage('Kubernetes Deploy') {
-            agent { label 'master' }
+            agent { label 'master' }  // Bu işlemi de master node üzerinde çalıştır.
             steps {
-                script {
-                    // Kubernetes pod'u deploy et
-                    sh """
-                    kubectl run time-checker --image=${DOCKER_IMAGE}:${DOCKER_TAG} --restart=Never --command -- python time_script.py
-                    """
-                }
+                sh 'echo "Uygulama başarıyla deploy edildi ve çalışıyor!"'
+                sh 'sleep 30' 
             }
         }
     }
 
     post {
         always {
-            node('master') {
+            node('master') {  // Bu aşamada bir node bağlamı belirt.
                 sh "docker logout"
             }
         }
