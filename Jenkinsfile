@@ -4,6 +4,7 @@ pipeline {
         DOCKER_IMAGE = "emreyesilkaya/jenkins"
         DOCKER_TAG = "${BUILD_NUMBER}"
         KUBECONFIG = credentials('my-kubeconfig') // Kubeconfig credential
+        MASTER_NODE_IP = "master-node-ip-address" // Master node IP adresi
     }
     
     stages {
@@ -13,26 +14,14 @@ pipeline {
             }
         }
 
-        // Kubectl'in kurulu olduğunu kontrol et
-        stage('Check Kubectl Installation') {
-            steps {
-                script {
-                    def kubectlCheck = sh(script: 'which kubectl', returnStatus: true)
-                    if (kubectlCheck != 0) {
-                        error "kubectl not found, exiting."
-                    } else {
-                        echo "kubectl is installed."
-                    }
-                }
-            }
-        }
-
+        // Docker Image Build
         stage('Docker Build') {
             steps {
                 sh 'docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} .'
             }
         }
 
+        // Docker Hub Login
         stage('Docker Hub Login') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials-id', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASS')]) {
@@ -41,17 +30,23 @@ pipeline {
             }
         }
 
+        // Docker Image Push
         stage('Docker Push') {
             steps {
                 sh 'docker push ${DOCKER_IMAGE}:${DOCKER_TAG}'
             }
         }
 
+        // Kubernetes Deploy (SSH ile Master Node'da çalıştır)
         stage('Kubernetes Deploy') {
             steps {
                 script {
                     def deployCmd = "kubectl --kubeconfig=${KUBECONFIG} set image deployment/your-deployment-name your-container-name=${DOCKER_IMAGE}:${DOCKER_TAG}"
-                    sh deployCmd
+                    
+                    // SSH ile master node'da kubectl komutunu çalıştır
+                    sh """
+                    sshpass -p 'your-master-node-password' ssh -o StrictHostKeyChecking=no user@${MASTER_NODE_IP} '${deployCmd}'
+                    """
                 }
             }
         }
@@ -59,7 +54,7 @@ pipeline {
 
     post {
         always {
-            // Docker'dan logout yap
+            // Docker logout
             sh 'docker logout'
         }
     }
