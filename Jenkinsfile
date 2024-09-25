@@ -2,6 +2,8 @@ pipeline {
     environment {
         DOCKER_IMAGE = "emreyesilkaya/jenkins" // Docker imajının ismi
         DOCKER_TAG = "${BUILD_NUMBER}" // Her build için otomatik artan versiyon numarası
+        KUBE_NAMESPACE = "jenkins" // Kubernetes namespace'i
+        DEPLOYMENT_NAME = "my-app-deployment" // Deployment ismi
     }
 
     stages {
@@ -22,28 +24,13 @@ pipeline {
 
         // Kubernetes'e deploy etme aşaması
         stage('Kubernetes Deploy') {
-            agent {
-                kubernetes {
-                    yaml """
-                        apiVersion: v1
-                        kind: Pod
-                        metadata:
-                          labels:
-                            app: my-app
-                        spec:
-                          containers:
-                          - name: my-app
-                            image: ${DOCKER_IMAGE}:${DOCKER_TAG}
-                            ports:
-                            - containerPort: 80
-                    """
-                }
-            }
             steps {
-                // Uygulamanın çalıştığını simüle etme ve deploy mesajı yazdırma
-                container('my-app') {
-                    sh 'echo "Uygulama başarıyla deploy edildi ve çalışıyor!"'
-                    sh 'sleep 30' // Uygulamanın simülasyonu için
+                script {
+                    // Kubernetes'de imajı güncelle ve deploy et
+                    sh """
+                    kubectl set image deployment/${DEPLOYMENT_NAME} my-app=${DOCKER_IMAGE}:${DOCKER_TAG} -n ${KUBE_NAMESPACE}
+                    kubectl rollout status deployment/${DEPLOYMENT_NAME} -n ${KUBE_NAMESPACE}
+                    """
                 }
             }
         }
