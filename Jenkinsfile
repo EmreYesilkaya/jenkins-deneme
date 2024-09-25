@@ -1,4 +1,6 @@
 pipeline {
+    agent any  // Bu pipeline herhangi bir uygun ajan üzerinde çalışacaktır.
+
     environment {
         DOCKER_IMAGE = "emreyesilkaya/jenkins" // Docker imajının ismi
         DOCKER_TAG = "${BUILD_NUMBER}" // Her build için otomatik artan versiyon numarası
