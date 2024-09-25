@@ -3,7 +3,7 @@ pipeline {
     environment {
         DOCKER_IMAGE = "emreyesilkaya/jenkins"
         DOCKER_TAG = "${BUILD_NUMBER}"
-        KUBECONFIG = credentials('kubeconfig-credentials-id') // Kubeconfig credential
+        KUBECONFIG = credentials('my-kubeconfig') // Kubeconfig credential
     }
     
     stages {
