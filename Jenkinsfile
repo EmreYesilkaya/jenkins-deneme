@@ -41,13 +41,6 @@ pipeline {
                     """
                 }
             }
-            steps {
-                container('my-app') {
-                    // Pod 3 dakika çalışacak ve her 10 saniyede bir saati gösterecek
-                    sh 'echo "Uygulama çalışmaya başladı. Her 10 saniyede bir saati gösterecek..."'
-                    sh 'sleep 180'  // 3 dakika boyunca çalışmasını simüle et
-                }
-            }
         }
     }
 
