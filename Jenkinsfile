@@ -41,8 +41,11 @@ pipeline {
                     """
                 }
             }
-            // Bu aşamada steps kısmı olmayacak, sadece deploy yapacak ve çıkacak
+            steps {
+                // Kubernetes deploy işlemi yapılacak ve başka işlem yapılmadan çıkılacak
+                script {
+                    echo "Kubernetes deploy işlemi yapıldı. Pipeline sona eriyor."
+                }
+            }
         }
     }
-
-}
