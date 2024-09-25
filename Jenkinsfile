@@ -4,8 +4,8 @@ pipeline {
         DOCKER_IMAGE = "emreyesilkaya/jenkins"
         DOCKER_TAG = "${BUILD_NUMBER}"
         MASTER_NODE_IP = "138.201.189.196"  // Master node IP adresi
-        SSH_USER = "master@138.201.189.196"      // SSH kullanıcı adı
-        SSH_PASS = "Sgnm238.."      // SSH şifresi
+        SSH_USER = "master"                 // SSH kullanıcı adı
+        SSH_PASS = "Sgnm238.."              // SSH şifresi
     }
     
     stages {
