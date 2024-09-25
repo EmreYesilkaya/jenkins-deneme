@@ -22,7 +22,7 @@ pipeline {
             }
         }
 
-        // Kubernetes'e deploy etme aşaması
+        // Kubernetes'e deploy etme aşaması (Son aşama)
         stage('Kubernetes Deploy') {
             agent {
                 kubernetes {
@@ -41,21 +41,8 @@ pipeline {
                     """
                 }
             }
-            steps {
-                // Uygulamanın çalıştığını simüle etme ve deploy mesajı yazdırma
-                container('my-app') {
-                    sh 'echo "Uygulama başarıyla deploy edildi ve çalışıyor!"'
-                    sh 'sleep 30' // Uygulamanın simülasyonu için
-                }
-            }
+            // Bu aşamada steps kısmı olmayacak, sadece deploy yapacak ve çıkacak
         }
     }
 
-    // Pipeline her zaman çalıştıktan sonra yapılacak işlemler
-    post {
-        always {
-            // Docker Hub'dan çıkış yap
-            sh "docker logout"
-        }
-    }
 }
