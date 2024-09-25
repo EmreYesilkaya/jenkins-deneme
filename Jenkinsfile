@@ -1,17 +1,12 @@
 pipeline {
-    agent none
-
     environment {
-        DOCKER_IMAGE = "emreyesilkaya/jenkins" 
-        DOCKER_TAG = "${BUILD_NUMBER}" 
-        KUBE_NAMESPACE = "default"  // Kubernetes namespace'i burada belirtin
-        DEPLOYMENT_NAME = "my-app-deployment"  // Deployment ismini burada belirtin
+        DOCKER_IMAGE = "emreyesilkaya/jenkins" // Docker imajının ismi
+        DOCKER_TAG = "${BUILD_NUMBER}" // Her build için otomatik artan versiyon numarası
     }
 
     stages {
         // Docker imajını oluşturma ve Docker Hub'a yükleme aşaması
         stage('Docker Build ve Push') {
-            agent { label 'master' }  // İşlemi master node üzerinde çalıştır.
             steps {
                 script {
                     // Docker Hub'a giriş yap
@@ -25,41 +20,40 @@ pipeline {
             }
         }
 
-        // Kubernetes Deploy aşaması
+        // Kubernetes'e deploy etme aşaması
         stage('Kubernetes Deploy') {
-            agent { label 'master' }  // Bu işlemi de master node üzerinde çalıştır.
-            steps {
-                script {
-                    // Kubernetes'de yeni image ile pod'u deploy et
-                    sh """
-                    kubectl set image deployment/${DEPLOYMENT_NAME} my-app=${DOCKER_IMAGE}:${DOCKER_TAG} -n ${KUBE_NAMESPACE}
-                    kubectl rollout status deployment/${DEPLOYMENT_NAME} -n ${KUBE_NAMESPACE}
+            agent {
+                kubernetes {
+                    yaml """
+                        apiVersion: v1
+                        kind: Pod
+                        metadata:
+                          labels:
+                            app: my-app
+                        spec:
+                          containers:
+                          - name: my-app
+                            image: ${DOCKER_IMAGE}:${DOCKER_TAG}
+                            ports:
+                            - containerPort: 80
                     """
                 }
             }
-        }
-
-        // Pod çıktısını gösterme aşaması
-        stage('Show Pod Logs') {
-            agent { label 'master' }  // Bu işlemi de master node üzerinde çalıştır.
             steps {
-                script {
-                    // Pod adını almak için podları listeleyip loglarını gösterecek komut
-                    sh """
-                    POD_NAME=\$(kubectl get pods -n ${KUBE_NAMESPACE} -l app=my-app -o jsonpath='{.items[0].metadata.name}')
-                    echo "Pod adı: \$POD_NAME"
-                    kubectl logs \$POD_NAME -n ${KUBE_NAMESPACE}
-                    """
+                // Uygulamanın çalıştığını simüle etme ve deploy mesajı yazdırma
+                container('my-app') {
+                    sh 'echo "Uygulama başarıyla deploy edildi ve çalışıyor!"'
+                    sh 'sleep 30' // Uygulamanın simülasyonu için
                 }
             }
         }
     }
 
+    // Pipeline her zaman çalıştıktan sonra yapılacak işlemler
     post {
         always {
-            node('master') {  // Bu aşamada bir node bağlamı belirt.
-                sh "docker logout"
-            }
+            // Docker Hub'dan çıkış yap
+            sh "docker logout"
         }
     }
 }
