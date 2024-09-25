@@ -4,6 +4,8 @@ pipeline {
     environment {
         DOCKER_IMAGE = "emreyesilkaya/jenkins" 
         DOCKER_TAG = "${BUILD_NUMBER}" 
+        KUBE_NAMESPACE = "default"  // Kubernetes namespace'i burada belirtin
+        DEPLOYMENT_NAME = "my-app-deployment"  // Deployment ismini burada belirtin
     }
 
     stages {
@@ -23,11 +25,32 @@ pipeline {
             }
         }
 
+        // Kubernetes Deploy aşaması
         stage('Kubernetes Deploy') {
             agent { label 'master' }  // Bu işlemi de master node üzerinde çalıştır.
             steps {
-                sh 'echo "Uygulama başarıyla deploy edildi ve çalışıyor!"'
-                sh 'sleep 30' 
+                script {
+                    // Kubernetes'de yeni image ile pod'u deploy et
+                    sh """
+                    kubectl set image deployment/${DEPLOYMENT_NAME} my-app=${DOCKER_IMAGE}:${DOCKER_TAG} -n ${KUBE_NAMESPACE}
+                    kubectl rollout status deployment/${DEPLOYMENT_NAME} -n ${KUBE_NAMESPACE}
+                    """
+                }
+            }
+        }
+
+        // Pod çıktısını gösterme aşaması
+        stage('Show Pod Logs') {
+            agent { label 'master' }  // Bu işlemi de master node üzerinde çalıştır.
+            steps {
+                script {
+                    // Pod adını almak için podları listeleyip loglarını gösterecek komut
+                    sh """
+                    POD_NAME=\$(kubectl get pods -n ${KUBE_NAMESPACE} -l app=my-app -o jsonpath='{.items[0].metadata.name}')
+                    echo "Pod adı: \$POD_NAME"
+                    kubectl logs \$POD_NAME -n ${KUBE_NAMESPACE}
+                    """
+                }
             }
         }
     }
