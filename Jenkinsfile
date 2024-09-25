@@ -37,6 +37,12 @@ pipeline {
                     """
                 }
             }
+            steps {
+                container('my-app') {
+                    sh 'echo "Uygulama başarıyla deploy edildi ve çalışıyor!"'
+                    sh 'sleep 30' // Uygulamanın çalıştığını simüle etmek için
+                }
+            }
         }
     }
 
