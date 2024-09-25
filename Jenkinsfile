@@ -34,7 +34,9 @@ pipeline {
 
     post {
         always {
-            sh "docker logout"
+            node('master') {  // Bu aşamada bir node bağlamı belirt.
+                sh "docker logout"
+            }
         }
     }
 }
