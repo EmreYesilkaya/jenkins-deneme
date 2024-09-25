@@ -1,5 +1,5 @@
 pipeline {
-    agent none 
+    agent none
 
     environment {
         DOCKER_IMAGE = "emreyesilkaya/jenkins" 
@@ -9,6 +9,7 @@ pipeline {
     stages {
         // Docker imajını oluşturma ve Docker Hub'a yükleme aşaması
         stage('Docker Build ve Push') {
+            agent { label 'master' }  // İşlemi master node üzerinde çalıştır.
             steps {
                 script {
                     // Docker Hub'a giriş yap
@@ -23,31 +24,10 @@ pipeline {
         }
 
         stage('Kubernetes Deploy') {
-            agent {
-                kubernetes {
-                    yaml """
-                    apiVersion: v1
-                    kind: Pod
-                    metadata:
-                      labels:
-                        app: my-app
-                    spec:
-                      containers:
-                      - name: my-app
-                        image: ${DOCKER_IMAGE}:${DOCKER_TAG}
-                        ports:
-                        - containerPort: 80
-                      - name: jnlp
-                        image: jenkins/inbound-agent:4.10-3
-                        args: ["\${computer.jnlpmac}", "\${computer.name}"]
-                    """
-                }
-            }
+            agent { label 'master' }  // Bu işlemi de master node üzerinde çalıştır.
             steps {
-                container('my-app') {
-                    sh 'echo "Uygulama başarıyla deploy edildi ve çalışıyor!"'
-                    sh 'sleep 30' 
-                }
+                sh 'echo "Uygulama başarıyla deploy edildi ve çalışıyor!"'
+                sh 'sleep 30' 
             }
         }
     }
